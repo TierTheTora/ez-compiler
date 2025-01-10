@@ -1,6 +1,7 @@
 &start:
-    stdout("Hello, World!")
+    stdout("Enter your name: ")
     my_inp: db stdin()
+    stdout("Hello, ")
     stdout(my_inp)
     exit()
 &exit:
