@@ -1,5 +1,6 @@
 # The EZ Compiler
 <img src="./ico.png" style="width: 100px;">
+
 ## Requirements
 - Any linux distro
 - The NASM Compiler
