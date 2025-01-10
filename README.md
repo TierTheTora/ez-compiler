@@ -13,10 +13,7 @@ sudo apt install gcc   # To install the C++ Compiler
 ## Compiling the programm
 Do 
 ```sh
-g++ -o main main.cpp # Compile
-./main               # Run the Programm
-# Input the file name (.ez extension)
-# When done, a folder with the file name should be generated with the executable.
+./ezscr file.ez # Replace 'file' with the file name
 ```
 
 ## Running the Compiled programm
