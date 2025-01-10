@@ -1,0 +1,7 @@
+&start:
+    stdout("Hello, World!")
+    my_inp: db stdin()
+    stdout(my_inp)
+    exit()
+&exit:
+    exit 66
