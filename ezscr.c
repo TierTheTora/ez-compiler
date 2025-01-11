@@ -12,6 +12,7 @@ int main(int argc, char **argv) {
     }
 
     char *ez = argv[1];
+    #ifdef __unix__
     char chmod_command[256];
     snprintf(chmod_command, sizeof(chmod_command), "chmod +x %s", ez);
     int status = system(chmod_command);
@@ -19,6 +20,7 @@ int main(int argc, char **argv) {
         perror("Error running chmod command");
         return 1;
     }
+    #endif
 
     FILE *tmp_file = fopen("tmp_input.txt", "w");
     if (tmp_file == NULL) {

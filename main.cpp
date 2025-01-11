@@ -35,12 +35,63 @@ int main() {
                 if (std::regex_match(buf, match, pattern)) {
                     std::string content = match[1].str();
 
+                    std::string result = "";
+                    for (size_t i = 0; i < content.size(); ++i) {
+                        if (content[i] == '\\' && i + 1 < content.size() && content[i + 1] == '\\') {
+                            result += '\\';
+                            ++i;
+                        } 
+                        else {
+                            result += content[i];
+                        }
+                    }
+
                     std::string label = "str" + std::to_string(str_count++);
 
                     if (content.find('"') != std::string::npos) {
                         std::string label = "str" + std::to_string(str_count++);
                         write << "section .data\n"
                             << label << ": db " << content << ", 0\n"
+                            << "section .text\n"
+                            << "mov rax, 1\n"
+                            << "mov rdi, 1\n"
+                            << "mov rsi, " << label << "\n"
+                            << "mov rdx, " << content.size() << "\n"
+                            << "syscall\n";
+                    } 
+                    else {
+                        write << "section .text\n"
+                              << "mov rax, 1\n"
+                              << "mov rdi, 1\n"
+                              << "mov rsi, " << content << "\n"
+                              << "mov rdx, " << content.size() << "\n"
+                              << "syscall\n";
+                    }
+                }
+            }
+            {
+                std::regex pattern(R"(^\s*stdoutln\((.*)\)\s*$)");
+                std::smatch match;
+                if (std::regex_match(buf, match, pattern)) {
+                    std::string content = match[1].str();
+
+                    std::string result = "";
+                    for (size_t i = 0; i < content.size(); ++i) {
+                        if (content[i] == '\\' && i + 1 < content.size() && content[i + 1] == '\\') {
+                            result += '\\';
+                            ++i;
+                        } 
+                        else {
+                            result += content[i];
+                        }
+                    }
+
+                    std::string label = "str" + std::to_string(str_count++);
+
+                    if (content.find('"') != std::string::npos) {
+                        std::string label = "str" + std::to_string(str_count++);
+                        write << "section .data\n"
+                            << label << ": db " << content << ", 0x0A, 0\n"
                             << "section .text\n"
                             << "mov rax, 1\n"
                             << "mov rdi, 1\n"
@@ -65,12 +116,12 @@ int main() {
                     std::string label = match[1].str();
 
                     write << "section .bss\n"
-                          << label << ": resb 100\n"
+                          << label << ": resb " << label.size() << "\n"
                           << "section .text\n"
                           << "mov rax, 0\n"
                           << "mov rdi, 0\n"
                           << "mov rsi, " << label << "\n"
-                          << "mov rdx, 100\n"
+                          << "mov rdx, " << label.size() << "\n"
                           << "syscall\n";
                 }
             }
@@ -93,16 +144,17 @@ int main() {
 
                     if (value.find("stdin(") != std::string::npos) {
                         write << "section .bss\n"
-                            << name << ": resb 100\n"
-                            << "section .text\n"
-                            << "mov rax, 0\n"
-                            << "mov rdi, 0\n"
-                            << "mov rsi, " << name << "\n"
-                            << "mov rdx, 255\n"
-                            << "syscall\n";
+                              << name << ": resb 100\n"
+                              << "section .text\n"
+                              << "mov byte [" << name <<  "+ rax], 0\n"
+                              << "mov rax, 0\n"
+                              << "mov rdi, 0\n"
+                              << "mov rsi, " << name << "\n"
+                              << "mov rdx, 255\n"
+                              << "syscall\n";
                     } else {
                         write << "section .data\n"
-                            << name << ": " << type << " " << value << "\n";
+                            << name << ": " << type << " " << value << ", 0\n";
                     }
                 }
             }
@@ -147,12 +199,21 @@ int main() {
 
         std::string dir = fname.substr(0, fname.size() - 3);
         {
-            std::string cmd = "mkdir -p " + dir + " && "
+            std::string cmd;
+            #ifdef __unix__
+            cmd = "mkdir -p " + dir + " && "
                   "cp output.asm " + dir + "/ && "
                   "nasm -f elf64 -o " + dir + "/output.o " + dir + "/output.asm && "
                   "ld -s -o " + dir + "/output " + dir + "/output.o && "
                   "rm " + dir + "/output.o " + dir + "/output.asm";
-                  //"rm output.asm";
+            #elif defined(_WIN32) || defined(_WIN64)
+            cmd = "if (!(Test-Path -Path \"" + dir + "\")) { New-Item -ItemType Directory -Path \"" + dir + "\" } ; " 
+                  "Copy-Item -Path output.asm -Destination \"" + dir + "\" ; "
+                  "nasm -f win64 -o \"" + dir + "\\output.o\" \"" + dir + "\\output.asm\" ; "
+                  "link /entry:_start /subsystem:console /out:\"" + dir + "\\output.exe\" \"" + dir + "\\output.o\" ; "
+                  "Remove-Item \"" + dir + "\\output.o\" ; "
+                  "Remove-Item \"" + dir + "\\output.asm\"";
+            #endif
             system(cmd.c_str());
         }
         read.close();
