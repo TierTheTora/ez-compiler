@@ -2,9 +2,9 @@
 <img src="./ico.png" style="width: 100px;">
 
 ## Requirements
-- Any linux distro
-- The NASM Compiler
-- The C++ Compiler
+- Any unix based system
+- A NASM Compiler
+- A C++ Compiler
 ### If you don't have a NASM Compiler or a C++ Compiler:
 Do 
 ```sh
