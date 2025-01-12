@@ -33,12 +33,14 @@ Do
 echo $?
   # >> 0
 ```
-## stdout()
+## stdout(), stdoutln()
 ```ez
 &start:
-    stdout("Hello, World!")
+    stdout("Hello, World!", 13)
+    stdoutln("Hello, World!", 13)
     exit 0
 ```
+You must include the length of the text to print it.
 ## stdin()
 ```ez
 &start:
@@ -52,13 +54,11 @@ echo $?
 &exit_prg:
     exit 0
 ```
-
-# Example:
+## Variables
 ```ez
 &start:
-  input: db stdin()
-  stdout(input)
-  ex()
-&ex:
-  exit 255
+    input: db stdin()
+    inptlen: equ $-input
+    stdoutln(input, inptlen)
+    exit 0
 ```
