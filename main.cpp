@@ -30,10 +30,11 @@ int main() {
 
         while (getline(read, buf)) {
             {
-                std::regex pattern(R"(^\s*stdout\((.*)\)\s*$)");
+                std::regex pattern (R"(^\s*stdout\((.*), (\w+)\)\s*$)");
                 std::smatch match;
                 if (std::regex_match(buf, match, pattern)) {
                     std::string content = match[1].str();
+                    std::string argl = match[2];
 
                     std::string result = "";
                     for (size_t i = 0; i < content.size(); ++i) {
@@ -56,7 +57,7 @@ int main() {
                             << "mov rax, 1\n"
                             << "mov rdi, 1\n"
                             << "mov rsi, " << label << "\n"
-                            << "mov rdx, " << content.size() << "\n"
+                            << "mov rdx, " << argl << "\n"
                             << "syscall\n";
                     } 
                     else {
@@ -64,16 +65,17 @@ int main() {
                               << "mov rax, 1\n"
                               << "mov rdi, 1\n"
                               << "mov rsi, " << content << "\n"
-                              << "mov rdx, " << content.size() << "\n"
+                              << "mov rdx, " << argl << "\n"
                               << "syscall\n";
                     }
                 }
             }
             {
-                std::regex pattern(R"(^\s*stdoutln\((.*)\)\s*$)");
+                std::regex pattern (R"(^\s*stdoutln\((.*), (\w+)\)\s*$)");
                 std::smatch match;
                 if (std::regex_match(buf, match, pattern)) {
                     std::string content = match[1].str();
+                    std::string argl = match[2];
 
                     std::string result = "";
                     for (size_t i = 0; i < content.size(); ++i) {
@@ -91,21 +93,21 @@ int main() {
                     if (content.find('"') != std::string::npos) {
                         std::string label = "str" + std::to_string(str_count++);
                         write << "section .data\n"
-                            << label << ": db " << content << ", 0x0A, 0\n"
+                            << label << ": db " << content << ", 0\n"
                             << "section .text\n"
                             << "mov rax, 1\n"
                             << "mov rdi, 1\n"
                             << "mov rsi, " << label << "\n"
-                            << "mov rdx, " << content.size() + 1 << "\n"
+                            << "mov rdx, " << argl << "\n"
                             << "syscall\n";
                     } 
                     else {
                         write << "section .text\n"
-                            << "mov rax, 1\n"
-                            << "mov rdi, 1\n"
-                            << "mov rsi, " << content << "\n"
-                            << "mov rdx, 100\n"
-                            << "syscall\n";
+                              << "mov rax, 1\n"
+                              << "mov rdi, 1\n"
+                              << "mov rsi, " << content << "\n"
+                              << "mov rdx, " << argl << "\n"
+                              << "syscall\n";
                     }
                 }
             }
@@ -116,7 +118,7 @@ int main() {
                     std::string label = match[1].str();
 
                     write << "section .bss\n"
-                          << label << ": resb " << label.size() << "\n"
+                          << label << ": resb 100\n"
                           << "section .text\n"
                           << "mov rax, 0\n"
                           << "mov rdi, 0\n"
@@ -134,7 +136,7 @@ int main() {
                 }
             }
             {
-                std::regex pattern(R"(^\s*(\w+):\s+(db|dw|dq|dd)\s+(.+))");
+                std::regex pattern(R"(^\s*(\w+):\s+(db|dw|dq|dd|equ)\s+(.+))");
                 std::smatch match;
 
                 if (std::regex_match(buf, match, pattern)) {
@@ -153,8 +155,16 @@ int main() {
                               << "mov rdx, 255\n"
                               << "syscall\n";
                     } else {
-                        write << "section .data\n"
-                            << name << ": " << type << " " << value << ", 0\n";
+                        if (!(type == "equ")) {
+                            write << "section .data\n"
+                                  << name << ": " << type << " " << value << ", 0\n"
+                                  << "section .text\n";
+                        }
+                        else {
+                            write << "section .data\n"
+                                  << name << ": " << type << " " << value << "\n"
+                                  << "section .text\n";
+                        }
                     }
                 }
             }
