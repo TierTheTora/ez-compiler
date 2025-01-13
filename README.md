@@ -58,7 +58,7 @@ You must include the length of the text to print it.
 ```ez
 &start:
     input: db stdin()
-    inptlen: equ $-input
-    stdoutln(input, inptlen)
+    buf: dw 100
+    stdoutln(input, buf)
     exit 0
 ```
