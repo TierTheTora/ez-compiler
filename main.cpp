@@ -216,13 +216,15 @@ int main() {
                   "nasm -f elf64 -o " + dir + "/output.o " + dir + "/output.asm && "
                   "ld -s -o " + dir + "/output " + dir + "/output.o && "
                   "rm " + dir + "/output.o " + dir + "/output.asm";
-            #elif defined(_WIN32) || defined(_WIN64)
+            /*#elif defined(_WIN32) || defined(_WIN64)
             cmd = "if (!(Test-Path -Path \"" + dir + "\")) { New-Item -ItemType Directory -Path \"" + dir + "\" } ; " 
                   "Copy-Item -Path output.asm -Destination \"" + dir + "\" ; "
                   "nasm -f win64 -o \"" + dir + "\\output.o\" \"" + dir + "\\output.asm\" ; "
                   "link /entry:_start /subsystem:console /out:\"" + dir + "\\output.exe\" \"" + dir + "\\output.o\" ; "
                   "Remove-Item \"" + dir + "\\output.o\" ; "
-                  "Remove-Item \"" + dir + "\\output.asm\"";
+                  "Remove-Item \"" + dir + "\\output.asm\"";*/
+            #else
+            std::cerr << "Error: unsupported platform\n";
             #endif
             system(cmd.c_str());
         }
