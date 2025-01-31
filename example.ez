@@ -1,9 +1,0 @@
-&start:
-    stdout("Enter your name: ")
-    my_inp: db stdin()
-    stdout(" ")
-    stdout("Hi, ")
-    stdout(my_inp)
-    exit()
-&exit:
-    exit 66
